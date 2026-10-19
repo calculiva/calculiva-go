@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	calculiva "github.com/calculiva/calculiva-go"
-	"github.com/calculiva/calculiva-go/asphalt"
 	"github.com/calculiva/calculiva-go/mulch"
 	"github.com/calculiva/calculiva-go/sod"
 	"github.com/calculiva/calculiva-go/soil"
@@ -96,41 +95,6 @@ func TestSodMatchesAPI(t *testing.T) {
 	eqPtr(t, "cost_whole", got.CostWhole, plan.Cost.Whole)
 }
 
-func TestAsphaltMatchesAPI(t *testing.T) {
-	var got asphaltJSON
-	cli(t, &got, "asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--pcf", "150", "--max-lift", "2.5", "--load", "3")
-	in := asphalt.NewInput([]asphalt.Zone{{ID: "d", Shape: asphalt.Rect{W: 10 * calculiva.Foot, L: 25 * calculiva.Foot}}},
-		[]asphalt.Course{{ID: "c", Thickness: 4 * calculiva.Inch}}, asphalt.PCF(150))
-	in.Load = 3
-	rules := asphalt.NewRules()
-	rules.MaxLiftStaticIn = 2.5
-	plan, err := asphalt.NewPlan(in, rules)
-	if err != nil {
-		t.Fatal(err)
-	}
-	eq(t, "tons", got.Tons, plan.Tons)
-	eq(t, "cu_ft", got.CuFt, plan.CuFt)
-	eq(t, "loads", got.Loads, plan.Loads)
-	eq(t, "lifts", got.Lifts, plan.Courses[0].Lifts)
-}
-
-func TestAsphaltMixDesignMatchesAPI(t *testing.T) {
-	var got asphaltJSON
-	cli(t, &got, "asphalt", "--shape", "round", "--radius", "6", "--part", "0.5", "--thickness", "2",
-		"--rice", "2.5", "--compaction", "93", "--water-pcf", "62", "--max-lift", "3", "--roller", "vibratory")
-	in := asphalt.NewInput([]asphalt.Zone{{ID: "r", Shape: asphalt.Round{R: 6 * calculiva.Foot, Part: 0.5}}},
-		[]asphalt.Course{{ID: "c", Thickness: 2 * calculiva.Inch}}, asphalt.MixDesign{Rice: 2.5, Compaction: 93})
-	in.Roller = asphalt.Vibratory
-	rules := asphalt.NewRules()
-	rules.WaterPCF, rules.MaxLiftVibratoryIn = 62, 3
-	plan, err := asphalt.NewPlan(in, rules)
-	if err != nil {
-		t.Fatal(err)
-	}
-	eq(t, "pcf", got.PCF, plan.PCF)
-	eq(t, "tons", got.Tons, plan.Tons)
-}
-
 func TestMissingRequiredFlags(t *testing.T) {
 	cases := []struct {
 		args []string
@@ -142,10 +106,6 @@ func TestMissingRequiredFlags(t *testing.T) {
 		{[]string{"soil", "--length", "8", "--width", "4", "--loose", "2000"}, "--depth"},
 		{[]string{"sod", "--length", "25", "--width", "18"}, "--pallet-pieces"},
 		{[]string{"sod", "--length", "25", "--width", "18", "--format", "custom", "--pallet-pieces", "170"}, "--piece-width"},
-		{[]string{"asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--max-lift", "2.5"}, "--pcf"},
-		{[]string{"asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--pcf", "150"}, "--max-lift"},
-		{[]string{"asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--rice", "2.5", "--max-lift", "2"}, "--compaction"},
-		{[]string{"asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--pcf", "150", "--max-lift", "2", "--nmas", "12.5"}, "--min-lift-multiple"},
 	}
 	for _, c := range cases {
 		var out, errb bytes.Buffer
@@ -158,8 +118,8 @@ func TestMissingRequiredFlags(t *testing.T) {
 
 func TestModuleErrorExitsOne(t *testing.T) {
 	var out, errb bytes.Buffer
-	code := run([]string{"asphalt", "--width", "10", "--length", "25", "--thickness", "4", "--pcf", "500", "--max-lift", "2"}, &out, &errb)
-	if code != 1 || !strings.Contains(errb.String(), "unit weight") {
+	code := run([]string{"mulch", "--length", "40", "--width", "3", "--count", "1.5", "--depth", "3"}, &out, &errb)
+	if code != 1 || !strings.Contains(errb.String(), "whole number of copies") {
 		t.Errorf("exit %d, stderr %q", code, errb.String())
 	}
 }
@@ -170,7 +130,7 @@ func TestVersionHelpUnknown(t *testing.T) {
 		t.Errorf("version: exit %d, %q", code, out.String())
 	}
 	out.Reset()
-	if code := run([]string{"help"}, &out, &errb); code != 0 || !strings.Contains(out.String(), "asphalt") {
+	if code := run([]string{"help"}, &out, &errb); code != 0 || !strings.Contains(out.String(), "mulch") || !strings.Contains(out.String(), "soil") || !strings.Contains(out.String(), "sod") {
 		t.Errorf("help: exit %d", code)
 	}
 	out.Reset()

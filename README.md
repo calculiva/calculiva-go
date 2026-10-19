@@ -1,7 +1,7 @@
 # calculiva-go
 
 Home improvement estimators from [calculiva.com](https://calculiva.com/), as a Go module:
-mulch, topsoil and fill, sod and hot mix asphalt.
+mulch, topsoil and fill, and sod.
 
 This module is a line-by-line port of the engine that runs the calculators on the site. The
 test vectors of the site are reproduced as Go tests, with the same inputs, the same expected
@@ -16,16 +16,15 @@ Go 1.21 or later. No dependency outside the standard library.
 
 ## What this module is, and is not
 
-Calculiva is a data house, not a trade. Nobody here claims to be a landscaper or a paver.
+Calculiva is a data house, not a trade. Nobody here claims to be a landscaper.
 What the module offers is arithmetic you can check and constants you can trace:
 
 - every business constant shipped (a pallet size, a CPSC depth, a sale unit) is a named Go
   constant or variable whose documentation gives the id of its data sheet, the public source
   it was read on and the date it was verified;
-- the values of commercial publishers whose terms do not allow reproduction (material and
-  asphalt unit weights, bag and wheelbarrow sizes, sod allowances, asphalt lift rules) are not
-  shipped: they are inputs of the user, with no default. The sources Calculiva read are listed
-  at <https://calculiva.com/data-sources/>;
+- the values of commercial publishers whose terms do not allow reproduction (material unit
+  weights, bag and wheelbarrow sizes, sod allowances) are not shipped: they are inputs of the
+  user, with no default. The sources Calculiva read are listed at <https://calculiva.com/data-sources/>;
 - nothing is rounded or invented to fill a gap: when a source is silent, the value is absent
   (a nil pointer or a nil slice, never a placeholder number);
 - the results are planning quantities. The manufacturer's instructions, the local code and
@@ -85,12 +84,6 @@ func main() {
 | `sod.NewPlan` | Pieces per area (rectangles laid out piece by piece), pallets, plugs, soil preparation, cost, weight. | [Sod calculator](https://calculiva.com/landscaping/sod-calculator/) |
 | `sod.LayRect` | Staggered layout of one rectangle with offcut pairing and strip grouping. | [Sod calculator](https://calculiva.com/landscaping/sod-calculator/) |
 | `sod.FormatTable` | Pieces per pallet coverage and per lawn for each format. | [Sod calculator](https://calculiva.com/landscaping/sod-calculator/) |
-| `asphalt.NewRules` | Builds the asphalt rules: pounds per short ton (NIST); the water unit weight, lift rules and references are entered by the user. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
-| `asphalt.NewPlan` | Tons by zone and course, lifts under the roller, whole loads, cost, reference spread. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
-| `asphalt.ZoneArea` | Area of a rectangle, flare (trapezoid) or disc fraction. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
-| `asphalt.UnitWeightOf` | In-place unit weight (a required input), entered or from the Rice value and compaction. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
-| `asphalt.RicePCF` | Rice value (maximum theoretical specific gravity) x compaction x unit weight of water, all entered by the user. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
-| `asphalt.CoverageTable` | Square feet and yards covered by one ton at each thickness. | [Asphalt calculator](https://calculiva.com/landscaping/asphalt-calculator/) |
 | `calculiva.ConstantsCSV` | The constants registry (one row per data sheet), embedded. | [Data sources](https://calculiva.com/data-sources/) |
 
 ## Data and licences

@@ -79,7 +79,7 @@ func FloorRel(n float64) float64 {
 	return math.Floor(n + float64(1e-9*math.Max(math.Abs(n), 1)))
 }
 
-// CeilULP rounds up, forgiving eight ULPs (asphalt).
+// CeilULP rounds up, forgiving eight ULPs.
 func CeilULP(n float64) float64 {
 	return math.Ceil(n - float64(epsilon*math.Max(n, 1)*8))
 }
